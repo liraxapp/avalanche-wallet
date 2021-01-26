@@ -1,0 +1,225 @@
+<template>
+    <div id="nav">
+        <ConfirmLogout ref="logout"></ConfirmLogout>
+        <router-link class="logo" to="/">
+            <img src="@/assets/wallet_logo.svg" v-if="$root.theme === 'day'" />
+            <img src="@/assets/wallet_logo_dark.svg" v-else />
+            <!--            <span class="slogan">by Avalanche</span>-->
+        </router-link>
+        <v-spacer></v-spacer>
+
+        <div class="buts_right">
+            <DayNightToggle class="action_but"></DayNightToggle>
+            <network-menu></network-menu>
+            <template v-if="isAuth">
+                <button @click="logout">{{ $t('logout.button') }}</button>
+            </template>
+            <template v-else>
+                <router-link class="action_but" data-cy="access" to="/access">
+                    {{ $t('nav.access') }}
+                </router-link>
+                <router-link class="action_but" data-cy="create" to="/create">
+                    {{ $t('nav.create') }}
+                </router-link>
+            </template>
+            <LanguageSelect class="lang_web"></LanguageSelect>
+        </div>
+
+        <div class="mobile_right">
+            <v-btn @click="isDrawer = !isDrawer" class="mobile_drawer" icon>
+                <fa icon="bars"></fa>
+            </v-btn>
+        </div>
+
+        <!--   MOBILE MENU     -->
+        <v-navigation-drawer
+            class="mobile_menu"
+            fixed
+            hide-overlay
+            ref="drawer"
+            style="z-index: 999"
+            v-model="isDrawer"
+        >
+            <v-list dense nav>
+                <div style="display: flex; justify-content: space-between; padding: 4px 8px">
+                    <img src="@/assets/wallet_logo.svg" v-if="$root.theme === 'day'" />
+                    <img src="@/assets/wallet_logo_dark.svg" v-else />
+                    <DayNightToggle class="action_but"></DayNightToggle>
+                </div>
+                <template v-if="isAuth">
+                    <router-link to="/wallet">{{ $t('wallet.sidebar.portfolio') }}</router-link>
+                    <router-link to="/wallet/keys">{{ $t('wallet.sidebar.manage') }}</router-link>
+                    <router-link to="/wallet/transfer">{{ $t('wallet.sidebar.send') }}</router-link>
+                    <button @click="logout" class="logout">
+                        {{ $t('logout.button') }}
+                    </button>
+
+                    <!--                    <v-list-item to="/wallet/">Home</v-list-item>-->
+                    <!--                    <v-list-item to="/wallet/keys">Manage Keys</v-list-item>-->
+                    <!--                    <v-list-item to="/wallet/transfer">Transfer</v-list-item>-->
+                    <!--                    <v-list-item @click="logout"><Log out/v-list-item>-->
+                </template>
+                <template v-else>
+                    <router-link to="/access">{{ $t('nav.access') }}</router-link>
+                    <router-link to="/create">{{ $t('nav.create') }}</router-link>
+                    <!--                    <v-list-item to="/access">Access Wallet</v-list-item>-->
+                    <!--                    <v-list-item to="/create" class="action_but">Get Started</v-list-item>-->
+                </template>
+                <div class="mobile_bottom">
+                    <LanguageSelect class="lang_mobile"></LanguageSelect>
+                </div>
+            </v-list>
+        </v-navigation-drawer>
+    </div>
+</template>
+<script lang="ts">
+import 'reflect-metadata'
+import { Vue, Component, Prop } from 'vue-property-decorator'
+import LanguageSelect from './misc/LanguageSelect/LanguageSelect.vue'
+import DayNightToggle from '@/components/misc/DayNightToggle.vue'
+import NetworkMenu from './NetworkSettings/NetworkMenu.vue'
+import ConfirmLogout from '@/components/modals/ConfirmLogout.vue'
+
+@Component({
+    components: {
+        NetworkMenu,
+        DayNightToggle,
+        ConfirmLogout,
+        LanguageSelect,
+    },
+})
+export default class Navbar extends Vue {
+    isDrawer: boolean = false
+
+    get isAuth(): boolean {
+        return this.$store.state.isAuth
+    }
+
+    logout(): void {
+        // @ts-ignore
+        this.$refs.logout.open()
+    }
+}
+</script>
+<style lang="scss" scoped>
+@use '../main';
+@use "../light_theme";
+
+img {
+    max-height: 25px;
+}
+
+a {
+    text-decoration: none;
+    font-weight: normal;
+    white-space: nowrap;
+    margin-right: 15px;
+}
+
+button {
+    font-weight: normal;
+}
+
+.daynight {
+    margin-right: 15px;
+}
+
+#nav {
+    .logo {
+        display: flex;
+        align-items: center;
+        color: var(--primary-color-light) !important;
+        font-size: 11px;
+        font-weight: 700;
+
+        &:hover {
+            opacity: 0.7;
+        }
+
+        img {
+            height: 30px;
+            max-height: none !important;
+            object-fit: contain;
+            margin-right: 5px;
+        }
+    }
+}
+
+.buts_right {
+    display: flex;
+    align-items: center;
+}
+
+.action_but {
+    color: var(--primary-color) !important;
+    padding: 6px 18px;
+    border-radius: 4px;
+}
+
+.mobile_right {
+    display: none;
+}
+
+.mobile_bottom {
+    position: absolute;
+    bottom: 14px;
+}
+
+.lang_mobile,
+.lang_web {
+    width: max-content;
+    margin: 0;
+}
+
+@media only screen and (max-width: main.$mobile_width) {
+    .lang_web {
+        display: none;
+    }
+
+    .buts_right {
+        display: none;
+
+        .router-link-exact-active {
+            background-color: #42b983;
+        }
+    }
+
+    .mobile_right {
+        display: block;
+    }
+
+    .mobile_drawer {
+        color: var(--primary-color) !important;
+    }
+
+    .logout {
+        margin-top: 40px;
+    }
+}
+</style>
+<style lang="scss">
+.mobile_menu {
+    background-color: var(--bg-light) !important;
+
+    .v-list-item,
+    .v-list-item--link {
+        color: var(--primary-color-light) !important;
+    }
+
+    .v-list-item--active {
+        color: var(--primary-color) !important;
+    }
+
+    a,
+    .logout {
+        display: block;
+        padding: 8px 8px;
+        color: var(--primary-color-light) !important;
+    }
+
+    .router-link-exact-active {
+        background-color: var(--bg);
+        color: var(--primary-color) !important;
+    }
+}
+</style>

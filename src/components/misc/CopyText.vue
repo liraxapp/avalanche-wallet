@@ -1,0 +1,69 @@
+<template>
+    <div @click="copy" class="copyBut">
+        <!--        <fa icon="copy"></fa>-->
+        <img src="/img/copy_icon.png" v-if="$root.theme === 'day'" />
+        <img src="/img/copy_night.svg" v-else />
+        <p class="text">
+            <slot></slot>
+        </p>
+        <input :value="value" ref="copytext" />
+    </div>
+</template>
+<script>
+export default {
+    props: {
+        value: String,
+    },
+    methods: {
+        copy() {
+            let copytext = this.$refs.copytext
+            copytext.select()
+            copytext.setSelectionRange(0, 99999)
+
+            document.execCommand('copy')
+            this.$store.dispatch('Notifications/add', {
+                title: ' Copied',
+                message: 'Copied to clipoard.',
+            })
+        },
+    },
+}
+</script>
+<style lang="scss" scoped>
+.copyBut {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    cursor: pointer;
+}
+
+.copyBut input {
+    width: 1px;
+    position: absolute;
+    opacity: 0;
+}
+
+.text {
+    user-select: none;
+    pointer-events: none;
+    margin-left: 12px !important;
+}
+
+img {
+    max-height: 18px;
+    object-fit: contain;
+}
+
+input {
+    pointer-events: none;
+    user-select: none;
+    width: 100% !important;
+}
+
+button {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+}
+</style>
